@@ -15,7 +15,7 @@ const planeHeight = 256;
 const zoom = 16;
 const scale = 2;
 
-const url = "https://domennameabcdef.ru/mac"
+const url = "https://domennameabcdef.ru/mac";
 
 function getChests(position) {
   return axios
@@ -72,9 +72,9 @@ function getDistance(latitude1, longitude1, latitude2, longitude2) {
   const a =
     Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
     Math.cos(lat1Rad) *
-    Math.cos(lat2Rad) *
-    Math.sin(deltaLon / 2) *
-    Math.sin(deltaLon / 2);
+      Math.cos(lat2Rad) *
+      Math.sin(deltaLon / 2) *
+      Math.sin(deltaLon / 2);
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
@@ -123,9 +123,10 @@ export default function Map3D() {
   }, [position, chests]);
 
   useEffect(() => {
-    findUser(id).then((user) => setUser(user)).catch(e => console.log(JSON.stringify(e)))
+    findUser(id)
+      .then((user) => setUser(user))
+      .catch((e) => saveUser(id).then((user) => setUser(user)));
   }, []);
-
 
   const { pixelX, pixelY } = latLonToPixel(position[0], position[1], zoom);
   const { mapX, mapY } = tileToPixel(tile[0], tile[1]);
