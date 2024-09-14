@@ -29,6 +29,10 @@ function saveUser(id) {
   return axios.post(`${url}/user/${id}`).then((res) => res.data);
 }
 
+function deactivateChest(id) {
+  return axios.patch(`${url}/chest/${id}/deactivate`).then((res) => res.data);
+}
+
 function latLonToTile(lat, lon, zoom) {
   const n = Math.pow(2, zoom);
   const lon_rad = lon * (Math.PI / 180);
@@ -117,6 +121,7 @@ export default function Map3D() {
       );
       if (distance < 20) {
         alert("Вы дошли до сундука!");
+        deactivateChest(chest.id);
       }
     });
   }, [position, chests]);
