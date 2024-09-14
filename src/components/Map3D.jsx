@@ -29,8 +29,10 @@ function saveUser(id) {
   return axios.post(`${url}/user/${id}`).then((res) => res.data);
 }
 
-function deactivateChest(id) {
-  return axios.patch(`${url}/chest/${id}/deactivate`).then((res) => res.data);
+function deactivateChest(id, chest_id) {
+  return axios
+    .patch(`${url}/chest/${id}/${chest_id}/deactivate`)
+    .then((res) => res.data);
 }
 
 function latLonToTile(lat, lon, zoom) {
@@ -85,7 +87,7 @@ function getDistance(latitude1, longitude1, latitude2, longitude2) {
 }
 
 export default function Map3D() {
-  const id = window?.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+  const id = window?.Telegram?.WebApp?.initDataUnsafe?.user?.id || 1;
   window.Telegram.WebApp.expand();
 
   const [position, setPosition] = useState([null, null]);
@@ -121,7 +123,9 @@ export default function Map3D() {
       );
       if (distance < 20) {
         alert("Вы дошли до сундука!");
-        deactivateChest(chest.id);
+        deactivateChest(chest.id, id);
+        findUser(id).then((user) => setUser(user));
+        getChests().then((chests) => setChests(chests));
       }
     });
   }, [position, chests]);
@@ -159,7 +163,7 @@ export default function Map3D() {
 
   useEffect(() => {
     getChests().then((chests) => setChests(chests));
-  }, [tile]);
+  }, []);
 
   if (position[0] == null || position[1] == null) return null;
   if (tile[0] == null || Number.isNaN(tile[0])) return null;
