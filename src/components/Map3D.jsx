@@ -17,10 +17,8 @@ const scale = 2;
 
 const url = "https://domennameabcdef.ru/mac";
 
-function getChests(position) {
-  return axios
-    .get(`${url}/chests?lat=${position[0]}&lon=${position[1]}`)
-    .then((res) => res.data);
+function getChests() {
+  return axios.get(`${url}/chest`).then((res) => res.data);
 }
 
 function findUser(id) {
@@ -84,6 +82,7 @@ function getDistance(latitude1, longitude1, latitude2, longitude2) {
 
 export default function Map3D() {
   const id = window?.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+  window.Telegram.WebApp.expand();
 
   const [position, setPosition] = useState([null, null]);
   const [tile, setTile] = useState([null, null]);
@@ -154,7 +153,7 @@ export default function Map3D() {
   }
 
   useEffect(() => {
-    getChests(position).then((chests) => setChests(chests));
+    getChests().then((chests) => setChests(chests));
   }, [tile]);
 
   if (position[0] == null || position[1] == null) return null;
@@ -163,7 +162,6 @@ export default function Map3D() {
 
   return (
     <>
-      {id}
       {user && <UserPoints points={user.points} />}
 
       <Canvas
