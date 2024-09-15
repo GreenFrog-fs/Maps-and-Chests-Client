@@ -5,86 +5,22 @@ import React, { useEffect, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 
 import { useThree } from "@react-three/fiber";
-import axios from "axios";
 import Chest3D from "./Chest3D";
 import UserPoints from "./UserPoints";
+import { getChests } from "../apiActions/getChests";
+import { findUser } from "../apiActions/findUser";
+import { saveUser } from "../apiActions/saveUser";
+import { deactivateChest } from "../apiActions/deactivateChest";
+import { latLonToTile } from "../calculations/latLonToTile";
+import { latLonToPixel } from "../calculations/latLonToPixel";
+import { tileToPixel } from "../calculations/tileToPixel";
+import { getDistance } from "../calculations/getDistance";
 
 const tileSize = 256;
 const planeWidth = 256;
 const planeHeight = 256;
 const zoom = 16;
 const scale = 2;
-
-const url = "https://domennameabcdef.ru/mac";
-
-function getChests() {
-  return axios.get(`${url}/chest/all`).then((res) => res.data);
-}
-
-function findUser(id) {
-  return axios.get(`${url}/user/${id}`).then((res) => res.data);
-}
-
-function saveUser(id) {
-  return axios.post(`${url}/user/${id}`).then((res) => res.data);
-}
-
-function deactivateChest(id, chest_id) {
-  return axios
-    .patch(`${url}/chest/${id}/${chest_id}/deactivate`)
-    .then((res) => res.data);
-}
-
-function latLonToTile(lat, lon, zoom) {
-  const n = Math.pow(2, zoom);
-  const lon_rad = lon * (Math.PI / 180);
-  const lat_rad = lat * (Math.PI / 180);
-  const x = ((lon_rad + Math.PI) / (2 * Math.PI)) * n;
-  const y =
-    ((1 - Math.log(Math.tan(lat_rad) + 1 / Math.cos(lat_rad)) / Math.PI) / 2) *
-    n;
-  return { x: Math.floor(x), y: Math.floor(y) };
-}
-
-function latLonToPixel(lat, lon, zoom) {
-  const n = Math.pow(2, zoom);
-  const lon_rad = lon * (Math.PI / 180);
-  const lat_rad = lat * (Math.PI / 180);
-  const x = ((lon_rad + Math.PI) / (2 * Math.PI)) * n;
-  const y =
-    ((1 - Math.log(Math.tan(lat_rad) + 1 / Math.cos(lat_rad)) / Math.PI) / 2) *
-    n;
-  const pixelX = x * tileSize;
-  const pixelY = y * tileSize;
-  return { pixelX, pixelY };
-}
-
-function tileToPixel(x, y) {
-  const tileSize = 256;
-  const mapX = x * tileSize;
-  const mapY = y * tileSize;
-  return { mapX, mapY };
-}
-
-function getDistance(latitude1, longitude1, latitude2, longitude2) {
-  const earthRadius = 6371000;
-  const lat1Rad = (latitude1 * Math.PI) / 180;
-  const lat2Rad = (latitude2 * Math.PI) / 180;
-  const deltaLat = ((latitude2 - latitude1) * Math.PI) / 180;
-  const deltaLon = ((longitude2 - longitude1) * Math.PI) / 180;
-
-  const a =
-    Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
-    Math.cos(lat1Rad) *
-      Math.cos(lat2Rad) *
-      Math.sin(deltaLon / 2) *
-      Math.sin(deltaLon / 2);
-
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-  const distance = earthRadius * c;
-  return distance;
-}
 
 export default function Map3D() {
   const id = window?.Telegram?.WebApp?.initDataUnsafe?.user?.id || 1;
@@ -94,6 +30,18 @@ export default function Map3D() {
   const [tile, setTile] = useState([null, null]);
   const [chests, setChests] = useState([]);
   const [user, setUser] = useState(null);
+
+  const tileOffsets = [
+    { dx: 0, dy: 0 },
+    { dx: 1, dy: 0 },
+    { dx: 0, dy: 1 },
+    { dx: 1, dy: 1 },
+    { dx: -1, dy: 0 },
+    { dx: -1, dy: 1 },
+    { dx: 0, dy: -1 },
+    { dx: -1, dy: -1 },
+    { dx: 1, dy: -1 },
+  ];
 
   useEffect(() => {
     navigator.geolocation.watchPosition(
@@ -136,8 +84,13 @@ export default function Map3D() {
       .catch((e) => saveUser(id).then((user) => setUser(user)));
   }, []);
 
-  const { pixelX, pixelY } = latLonToPixel(position[0], position[1], zoom);
-  const { mapX, mapY } = tileToPixel(tile[0], tile[1]);
+  const { pixelX, pixelY } = latLonToPixel(
+    position[0],
+    position[1],
+    zoom,
+    tileSize
+  );
+  const { mapX, mapY } = tileToPixel(tile[0], tile[1], tileSize);
 
   const offsetX = pixelX - mapX;
   const offsetY = pixelY - mapY;
@@ -163,6 +116,9 @@ export default function Map3D() {
 
   useEffect(() => {
     getChests().then((chests) => setChests(chests));
+    setInterval(() => {
+      getChests().then((chests) => setChests(chests));
+    }, 10000);
   }, []);
 
   if (position[0] == null || position[1] == null) return null;
@@ -185,95 +141,17 @@ export default function Map3D() {
       >
         <ambientLight intensity={0.3} />
 
-        <Tile3D
-          x={tile[0]}
-          y={tile[1]}
-          position={[0, 0, 0]}
-          zoom={zoom}
-          size={[planeWidth, planeHeight]}
-          scale={scale}
-        />
-
-        <Tile3D
-          x={tile[0] + 1}
-          y={tile[1]}
-          position={[planeWidth * scale, 0, 0]}
-          zoom={zoom}
-          size={[planeWidth, planeHeight]}
-          scale={scale}
-        />
-
-        <Tile3D
-          x={tile[0]}
-          y={tile[1] + 1}
-          position={[0, -planeHeight * scale, 0]}
-          zoom={zoom}
-          size={[planeWidth, planeHeight]}
-          scale={scale}
-        />
-
-        <Tile3D
-          x={tile[0] + 1}
-          y={tile[1] + 1}
-          position={[planeWidth * scale, -planeHeight * scale, 0]}
-          zoom={zoom}
-          size={[planeWidth, planeHeight]}
-          scale={scale}
-        />
-
-        <Tile3D
-          x={tile[0] - 1}
-          y={tile[1]}
-          position={[-planeWidth * scale, 0, 0]}
-          zoom={zoom}
-          size={[planeWidth, planeHeight]}
-          scale={scale}
-        />
-
-        <Tile3D
-          x={tile[0] - 1}
-          y={tile[1] + 1}
-          position={[-planeWidth * scale, -planeHeight * scale, 0]}
-          zoom={zoom}
-          size={[planeWidth, planeHeight]}
-          scale={scale}
-        />
-
-        <Tile3D
-          x={tile[0]}
-          y={tile[1] - 1}
-          position={[0, planeHeight * scale, 0]}
-          zoom={zoom}
-          size={[planeWidth, planeHeight]}
-          scale={scale}
-        />
-
-        <Tile3D
-          x={tile[0] - 1}
-          y={tile[1] - 1}
-          position={[-planeWidth * scale, planeHeight * scale, 0]}
-          zoom={zoom}
-          size={[planeWidth, planeHeight]}
-          scale={scale}
-        />
-
-        <Tile3D
-          x={tile[0] - 1}
-          y={tile[1]}
-          position={[-planeWidth * scale, 0, 0]}
-          zoom={zoom}
-          size={[planeWidth, planeHeight]}
-          scale={scale}
-        />
-
-        <Tile3D
-          x={tile[0] + 1}
-          y={tile[1] - 1}
-          position={[planeWidth * scale, planeHeight * scale, 0]}
-          zoom={zoom}
-          size={[planeWidth, planeHeight]}
-          scale={scale}
-        />
+        {tileOffsets.map(({ dx, dy }, index) => (
+          <Tile3D
+            key={index}
+            x={tile[0] + dx}
+            y={tile[1] + dy}
+            position={[dx * planeWidth * scale, -dy * planeHeight * scale, 0]}
+            zoom={zoom}
+            size={[planeWidth, planeHeight]}
+            scale={scale}
+          />
+        ))}
 
         <User3D
           position={[
@@ -286,9 +164,10 @@ export default function Map3D() {
           const { pixelX, pixelY } = latLonToPixel(
             chests.lat,
             chests.lon,
-            zoom
+            zoom,
+            tileSize
           );
-          const { mapX, mapY } = tileToPixel(tile[0], tile[1]);
+          const { mapX, mapY } = tileToPixel(tile[0], tile[1], tileSize);
 
           const offsetX = pixelX - mapX;
           const offsetY = pixelY - mapY;
@@ -303,7 +182,6 @@ export default function Map3D() {
             />
           );
         })}
-
         <CameraController />
       </Canvas>
     </>
