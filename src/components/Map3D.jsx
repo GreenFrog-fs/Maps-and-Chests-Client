@@ -18,7 +18,7 @@ const scale = 2;
 const url = "https://domennameabcdef.ru/mac";
 
 function getChests() {
-  return axios.get(`${url}/chest`).then((res) => res.data);
+  return axios.get(`${url}/chest/all`).then((res) => res.data);
 }
 
 function findUser(id) {
@@ -121,7 +121,7 @@ export default function Map3D() {
         chest.lat,
         chest.lon
       );
-      if (distance < 20) {
+      if (distance < 100) {
         alert("Вы дошли до сундука!");
         deactivateChest(chest.id, id);
         findUser(id).then((user) => setUser(user));
