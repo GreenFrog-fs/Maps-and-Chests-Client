@@ -14,4 +14,4 @@ export const tileOffsets = [
   { dx: -1, dy: -1 },
   { dx: 1, dy: -1 },
 ];
-export const url = "http://localhost:4000" //"https://domennameabcdef.ru/mac";
+export const url = "https://domennameabcdef.ru/mac";
