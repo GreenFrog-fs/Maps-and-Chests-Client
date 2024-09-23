@@ -1,4 +1,7 @@
-export function getDistance(latitude1, longitude1, latitude2, longitude2) {
+export function getDistance(position, latitude2, longitude2) {
+  const latitude1 = position[0];
+  const longitude1 = position[1];
+
   const earthRadius = 6371000;
   const lat1Rad = (latitude1 * Math.PI) / 180;
   const lat2Rad = (latitude2 * Math.PI) / 180;

@@ -1,6 +1,10 @@
 import axios from "axios";
-import { url } from "./url";
+import { url } from "../constants";
 
 export function findUser(id) {
-  return axios.get(`${url}/user/${id}`).then((res) => res.data);
+  return axios
+    .post(`${url}/user/find`, {
+      id: id,
+    })
+    .then((res) => res.data);
 }

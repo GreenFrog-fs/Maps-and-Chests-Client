@@ -1,4 +1,6 @@
-export function latLonToPixel(lat, lon, zoom, tileSize) {
+import { tileSize, zoom } from "../constants";
+
+export function latLonToPixel(lat, lon) {
   const n = Math.pow(2, zoom);
   const lon_rad = lon * (Math.PI / 180);
   const lat_rad = lat * (Math.PI / 180);
