@@ -7,6 +7,7 @@ const useUserStore = create((set, get) => ({
   user: null,
   position: [],
   closestChest: null,
+  avatar_src: "/models/user1.glb",
   getUser: async () => {
     const { id } = get();
     try {
@@ -22,6 +23,9 @@ const useUserStore = create((set, get) => ({
   },
   setClosestChest: (chest) => {
     set({ closestChest: chest });
+  },
+  setAvatarSrc: (src) => {
+    set({ avatar_src: src });
   },
 }));
 

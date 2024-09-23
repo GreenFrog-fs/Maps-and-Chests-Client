@@ -10,6 +10,7 @@
 body {
   margin: 0;
   font-family: "Roboto", sans-serif;
+  background: white;
 }
 
 .main {
@@ -39,7 +40,7 @@ footer {
   align-items: center;
 }
 
-.points>img {
+.points > img {
   width: 30px;
   height: 30px;
 }
@@ -49,7 +50,7 @@ footer {
   gap: 5px;
 }
 
-.nav>button {
+.nav > button {
   background: transparent;
   border: 2px solid black;
   border-radius: 5px;
@@ -60,7 +61,7 @@ footer {
   place-content: center;
 }
 
-.nav>button>img {
+.nav > button > img {
   width: 30px;
   height: 30px;
 }
@@ -151,7 +152,7 @@ footer {
   font-weight: 700;
 }
 
-.product_points>img {
+.product_points > img {
   width: 25px;
   height: 25px;
 }

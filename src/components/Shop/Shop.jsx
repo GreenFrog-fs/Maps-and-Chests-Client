@@ -11,8 +11,8 @@ const Shop = ({ style }) => {
     <div style={style}>
       <p className="shop_items_name">аватары</p>
       <div className="products_list">
-        {avatars.map((url) => (
-          <ProductCard key={url} url={url} />
+        {avatars.map((avatar) => (
+          <ProductCard key={avatar.id} avatar={avatar} />
         ))}
       </div>
     </div>

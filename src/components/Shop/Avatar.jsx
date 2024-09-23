@@ -4,9 +4,9 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { useLoader } from "@react-three/fiber";
 import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
 
-const AvatarModel = ({ url }) => {
+const AvatarModel = ({ src }) => {
   const modelRef = useRef(null);
-  const gltf = useLoader(GLTFLoader, `/models/${url}.glb`);
+  const gltf = useLoader(GLTFLoader, src);
 
   return (
     <primitive
@@ -19,7 +19,7 @@ const AvatarModel = ({ url }) => {
   );
 };
 
-const Avatar = ({ style, url }) => {
+const Avatar = ({ style, src }) => {
   return (
     <div style={style} className="product_card_scene">
       <Canvas
@@ -31,7 +31,7 @@ const Avatar = ({ style, url }) => {
         <ambientLight intensity={0.3} />
         <directionalLight position={[5, 10, 7.5]} intensity={2} castShadow />
         <Suspense>
-          <AvatarModel url={url} />
+          <AvatarModel src={src} />
         </Suspense>
       </Canvas>
     </div>

@@ -89,7 +89,7 @@ export default function Map3D({ style }) {
         }}
       >
         <ambientLight intensity={0.3} />
-        <directionalLight position={[5, 10, 7.5]} intensity={2} castShadow />
+        <directionalLight position={[5, 10, 7.5]} intensity={4} castShadow />
         <Tiles3D tile={tile} />
         <Chests3D tile={tile} />
         <User3D
