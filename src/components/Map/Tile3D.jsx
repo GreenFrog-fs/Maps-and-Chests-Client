@@ -5,7 +5,7 @@ import { TextureLoader } from "three";
 export default function Tile3D({ x, y, position, size, zoom, scale }) {
   const meshRef = useRef(null);
 
-  const tileUrl = `/tiles/${zoom}/${x}/${y}.jpg`;
+  const tileUrl = `/minitiles/${zoom}/${x}/${y}.jpg`;
   const texture = useLoader(TextureLoader, tileUrl);
 
   return (

@@ -3,7 +3,7 @@ import { findUser } from "../apiActions/findUser";
 import { saveUser } from "../apiActions/saveUser";
 
 const useUserStore = create((set, get) => ({
-  id: window?.Telegram?.WebApp?.initDataUnsafe?.user?.id || 1,
+  id: window?.Telegram?.WebApp?.initDataUnsafe?.user?.id ? "" + window?.Telegram?.WebApp?.initDataUnsafe?.user?.id : "123",
   user: null,
   position: [],
   closestChest: null,

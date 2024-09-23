@@ -24,7 +24,7 @@ const useShopStore = create((set, get) => ({
 
   buyAvatar: async (avatar) => {
     const { user, getUser } = useUserStore.getState();
-    if (user.points > avatar.price) {
+    if (user.points >= avatar.price) {
       await axios.post(`${url}/avatars/buy`, { userid: user.id, avatarid: avatar.id })
       await get().getAvatars()
       await getUser()

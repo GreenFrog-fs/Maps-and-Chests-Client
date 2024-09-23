@@ -6,14 +6,14 @@ import { useLoader } from "@react-three/fiber";
 
 export default function Chest3D({ position }) {
   const modelRef = useRef(null);
-  const gltf = useLoader(GLTFLoader, "/models/chest.glb");
+  const gltf = useLoader(GLTFLoader, "/models/chest3D.glb");
 
   return (
     <primitive
       ref={modelRef}
       object={clone(gltf.scene)}
       position={[...position, 20]}
-      scale={[8, 8, 8]}
+      scale={[25, 25, 25]}
       rotation={[Math.PI / 2, -Math.PI / 2, 0]}
     />
   );
