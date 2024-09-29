@@ -2,16 +2,21 @@ import { useState } from "react";
 import usePageStore from "../stores/pageStore";
 import { deactivateChest } from "../apiActions/deactivateChest";
 import useUserStore from "../stores/userStore";
+import useChestsStore from "../stores/chestsStore";
 
 export default function Clicker() {
-  const { id, closestChest } = useUserStore();
+  const { id, closestChest, setClosestChest, getUser, user } = useUserStore();
   const [count, setCount] = useState(10);
   const { hideClicker } = usePageStore();
-  const clickHandler = () => {
+  const { deleteChestFromFront } = useChestsStore();
+  const clickHandler = async () => {
     setCount(count - 1);
     if (count == 1) {
       hideClicker();
-      deactivateChest(closestChest.id, id);
+      await deactivateChest(closestChest.id, id);
+      deleteChestFromFront(closestChest.id);
+      setClosestChest(null);
+      getUser();
     }
   };
   return (

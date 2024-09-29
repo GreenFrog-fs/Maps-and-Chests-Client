@@ -10,7 +10,10 @@ const useChestsStore = create((set, get) => ({
       setInterval(() => {
         getChests().then((chests) => set({ chests }));
       }, 10000);
-    } catch (error) { }
+    } catch (error) {}
+  },
+  deleteChestFromFront: (id) => {
+    set({ chests: get().chests.filter((chest) => chest.id != id) });
   },
 }));
 

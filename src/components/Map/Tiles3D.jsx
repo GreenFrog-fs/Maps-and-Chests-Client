@@ -1,21 +1,21 @@
-import {
-  planeHeight,
-  planeWidth,
-  scale,
-  tileOffsets,
-  zoom,
-} from "../../constants";
+import { planeHeight, planeWidth, scale, zoom } from "../../constants";
+import useTileStore from "../../stores/tileStore";
 import Tile3D from "./Tile3D";
 
-export default function Tiles3D({ tile }) {
+export default function Tiles3D() {
+  const { userTile, tiles } = useTileStore();
   return (
     <>
-      {tileOffsets.map(({ dx, dy }, index) => (
+      {tiles.map((position, index) => (
         <Tile3D
           key={index}
-          x={tile[0] + dx}
-          y={tile[1] + dy}
-          position={[dx * planeWidth * scale, -dy * planeHeight * scale, 0]}
+          x={position[0]}
+          y={position[1]}
+          position={[
+            planeWidth * scale * (position[0] - userTile[0]),
+            planeHeight * scale * (userTile[1] - position[1]),
+            0,
+          ]}
           zoom={zoom}
           size={[planeWidth, planeHeight]}
           scale={scale}

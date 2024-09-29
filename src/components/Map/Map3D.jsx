@@ -8,16 +8,21 @@ import { tileToPixel } from "../../calculations/tileToPixel";
 import { getDistance } from "../../calculations/getDistance";
 import useUserStore from "../../stores/userStore";
 import useChestsStore from "../../stores/chestsStore";
-import { scale, tileSize, zoom } from "../../constants";
+import { lootDistance, scale, tileSize, zoom } from "../../constants";
 import Tiles3D from "./Tiles3D";
 import Chests3D from "./Chests3D";
 import usePageStore from "../../stores/pageStore";
+import calculateAngle from "../../calculations/calculateAngle";
+import Arrow3D from "./Arrow3D";
+import useTileStore from "../../stores/tileStore";
+import { distanceToTileEdges } from "../../calculations/distanceToTileEdges";
 
 export default function Map3D({ style }) {
-  const [tile, setTile] = useState([null, null]);
-  const { position, setPosition, setClosestChest } = useUserStore();
+  const [arrowAngle, setArrowAngle] = useState(0);
+  const { position, setPosition, setClosestChest, prevPos } = useUserStore();
   const { chests } = useChestsStore();
   const { activateClicker } = usePageStore();
+  const { userTile, setUserTile, addTile } = useTileStore();
 
   useEffect(() => {
     navigator.geolocation.watchPosition(
@@ -26,7 +31,7 @@ export default function Map3D({ style }) {
         setPosition([latitude, longitude]);
         const x = latLonToTile(latitude, longitude, zoom).x;
         const y = latLonToTile(latitude, longitude, zoom).y;
-        setTile([x, y]);
+        setUserTile([x, y]);
       },
       (error) => console.log(error),
       {
@@ -38,24 +43,52 @@ export default function Map3D({ style }) {
   }, []);
 
   useEffect(() => {
+    const distances = distanceToTileEdges(
+      position[0],
+      position[1],
+      userTile[0],
+      userTile[1]
+    );
+    if (distances.right < 150) addTile(1, 0);
+    if (distances.left < 150) addTile(-1, 0);
+    if (distances.top < 150) addTile(0, -1);
+    if (distances.bottom < 150) addTile(0, 1);
+    if (distances.top < 150 && distances.right < 150) addTile(1, -1);
+    if (distances.top < 150 && distances.left < 150) addTile(-1, -1);
+    if (distances.bottom < 150 && distances.right < 150) addTile(1, 1);
+    if (distances.bottom < 150 && distances.left < 150) addTile(-1, 1);
+  }, [userTile]);
+
+  useEffect(() => {
+    let mindistance = Infinity;
+    let closest = null;
     chests.forEach((chest) => {
       const distance = getDistance(position, chest.lat, chest.lon);
-      if (distance < 100) {
+      if (distance < mindistance) {
+        mindistance = distance;
+        closest = chest;
+        setArrowAngle(
+          -calculateAngle(position[0], position[1], chest.lat, chest.lon)
+        );
         setClosestChest(chest);
-        activateClicker();
+        if (mindistance < lootDistance) {
+          return activateClicker();
+        }
       }
     });
   }, [position, chests]);
 
+  const { pixelX: prevPixelX, pixelY: prevPixelY } = latLonToPixel(
+    prevPos[0],
+    prevPos[1]
+  );
   const { pixelX, pixelY } = latLonToPixel(position[0], position[1]);
-  const { mapX, mapY } = tileToPixel(tile[0], tile[1], tileSize);
+  const { mapX, mapY } = tileToPixel(userTile[0], userTile[1], tileSize);
 
   const offsetX = pixelX - mapX;
   const offsetY = pixelY - mapY;
-
-  if (position[0] == null || position[1] == null) return null;
-  if (tile[0] == null || Number.isNaN(tile[0])) return null;
-  if (tile[1] == null || Number.isNaN(tile[1])) return null;
+  const prevOffsetX = prevPixelX - mapX;
+  const prevOffsetY = prevPixelY - mapY;
 
   function CameraController() {
     const { camera } = useThree();
@@ -63,8 +96,8 @@ export default function Map3D({ style }) {
     useEffect(() => {
       camera.position.set(
         scale * (-tileSize / 2 + offsetX),
-        scale * (tileSize / 2 - offsetY) - 50,
-        200
+        scale * (tileSize / 2 - offsetY) - 25,
+        60
       );
       camera.lookAt(
         scale * (-tileSize / 2 + offsetX),
@@ -76,30 +109,41 @@ export default function Map3D({ style }) {
     return null;
   }
 
+  const userPosition = [
+    scale * (-tileSize / 2 + offsetX),
+    scale * (tileSize / 2 - offsetY),
+  ];
+  const prevUserPosition = [
+    scale * (-tileSize / 2 + prevOffsetX),
+    scale * (tileSize / 2 - prevOffsetY),
+  ];
+  const cameraPosition = [
+    scale * (-tileSize / 2 + offsetX),
+    scale * (tileSize / 2 - offsetY) - 25,
+    60,
+  ];
   return (
     <div className="scene" style={style}>
       <Canvas
         camera={{
-          position: [
-            scale * (-tileSize / 2 + offsetX),
-            scale * (tileSize / 2 - offsetY) - 50,
-            200,
-          ],
-          fov: 90,
+          position: cameraPosition,
+          fov: 75,
         }}
       >
         <ambientLight intensity={0.3} />
-        <directionalLight position={[5, 10, 7.5]} intensity={4} castShadow />
-        <Tiles3D tile={tile} />
-        <Chests3D tile={tile} />
-        <User3D
-          position={[
-            scale * (-tileSize / 2 + offsetX),
-            scale * (tileSize / 2 - offsetY),
-          ]}
-        />
+        <directionalLight position={[0, -10, 7]} intensity={3} castShadow />
 
+        <Tiles3D />
+        <Chests3D />
+        <User3D position={userPosition} prev={prevUserPosition} />
         <CameraController />
+        {chests.length > 0 && (
+          <Arrow3D
+            position={userPosition}
+            prev={prevUserPosition}
+            angle={arrowAngle}
+          />
+        )}
       </Canvas>
     </div>
   );

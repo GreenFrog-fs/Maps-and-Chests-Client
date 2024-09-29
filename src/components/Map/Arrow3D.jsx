@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react";
-import useUserStore from "../../stores/userStore";
-import PositionWrapper3D from "./PositionWrapper3D";
-import UserModel3D from "./UserModel3D";
-import calculateAngle from "../../calculations/calculateAngle";
+import { useEffect, useRef, useState } from "react";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { clone } from "three/examples/jsm/utils/SkeletonUtils";
 
-export default function User3D({ position, prev }) {
-  const { avatar_src } = useUserStore();
+import { useLoader } from "@react-three/fiber";
+
+export default function Arrow3D({ position, prev, angle }) {
+  const modelRef = useRef(null);
+  const gltf = useLoader(GLTFLoader, "/models/angle.glb");
+
   const [currentPosition, setCurrentPosition] = useState(prev);
-  const [angle, setAngle] = useState(0);
+
   useEffect(() => {
     if (isNaN(prev[0]) || isNaN(prev[1])) {
       setCurrentPosition(position);
@@ -24,8 +26,7 @@ export default function User3D({ position, prev }) {
             ((position[1] - startPosition[1]) * frame) / transitionFrames,
         ];
         setCurrentPosition(lerpPosition);
-        if (prev[0] != position[0] && prev[1] != position[1])
-          setAngle(calculateAngle(prev[0], prev[1], position[0], position[1]));
+
         if (frame < transitionFrames) {
           requestAnimationFrame(animate);
         }
@@ -36,8 +37,12 @@ export default function User3D({ position, prev }) {
   }, [position, prev]);
 
   return (
-    <PositionWrapper3D position={currentPosition} angle={angle}>
-      <UserModel3D avatar_src={avatar_src} />
-    </PositionWrapper3D>
+    <primitive
+      ref={modelRef}
+      object={clone(gltf.scene)}
+      position={[...currentPosition, 5]}
+      scale={[6, 6, 6]}
+      rotation={[Math.PI / 2, angle, 0]}
+    />
   );
 }

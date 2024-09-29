@@ -1,13 +1,19 @@
 import { create } from "zustand";
 import { findUser } from "../apiActions/findUser";
 import { saveUser } from "../apiActions/saveUser";
+import { getDistance } from "../calculations/getDistance";
 
 const useUserStore = create((set, get) => ({
-  id: window?.Telegram?.WebApp?.initDataUnsafe?.user?.id ? "" + window?.Telegram?.WebApp?.initDataUnsafe?.user?.id : "123",
+  id: window?.Telegram?.WebApp?.initDataUnsafe?.user?.id
+    ? "" + window?.Telegram?.WebApp?.initDataUnsafe?.user?.id
+    : "123",
   user: null,
   position: [],
+  positions: [],
+  prevPos: [],
   closestChest: null,
-  avatar_src: "/models/user1.glb",
+  avatar_src: "/models/4.glb",
+
   getUser: async () => {
     const { id } = get();
     try {
@@ -19,7 +25,16 @@ const useUserStore = create((set, get) => ({
     }
   },
   setPosition: (position) => {
-    set({ position });
+    const now = get().position;
+    if (now.length == 0) {
+      set({ position });
+      set({ positions: [...get().positions, position] });
+    }
+    if (getDistance(now, position[0], position[1]) > 1) {
+      set({ position });
+      set({ positions: [...get().positions, position] });
+    }
+    set({ prevPos: now });
   },
   setClosestChest: (chest) => {
     set({ closestChest: chest });

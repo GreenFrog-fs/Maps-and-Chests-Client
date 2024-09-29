@@ -13,7 +13,7 @@ export default function Chest3D({ position }) {
       ref={modelRef}
       object={clone(gltf.scene)}
       position={[...position, 20]}
-      scale={[25, 25, 25]}
+      scale={[8, 8, 8]}
       rotation={[Math.PI / 2, -Math.PI / 2, 0]}
     />
   );

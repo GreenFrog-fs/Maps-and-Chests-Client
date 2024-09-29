@@ -1,9 +1,12 @@
+import { getDistance } from "../calculations/getDistance";
+import useChestsStore from "../stores/chestsStore";
 import usePageStore from "../stores/pageStore";
 import useUserStore from "../stores/userStore";
 
 export default function Footer() {
-  const { user } = useUserStore();
+  const { user, position, closestChest } = useUserStore();
   const { setPage } = usePageStore();
+  const { chests } = useChestsStore();
   function mapClickHandler() {
     setPage("map");
   }
@@ -13,17 +16,21 @@ export default function Footer() {
   function userClickHandler() {
     setPage("user");
   }
+  const distance =
+    closestChest &&
+    Math.floor(getDistance(position, closestChest.lat, closestChest.lon));
   return (
     <footer>
+      <div className="additionalFooter">
+        <p>сундуков на карте: {chests.length}</p>
+        {distance && <p>до ближайшего: {distance}м</p>}
+      </div>
       <nav className="nav">
         <button onClick={mapClickHandler}>
           <img src="/icons/map.png" />
         </button>
         <button onClick={shopClickHandler}>
           <img src="/icons/shop.png" />
-        </button>
-        <button onClick={userClickHandler}>
-          <img src="/icons/user.png" />
         </button>
       </nav>
       <div className="points">

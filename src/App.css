@@ -20,7 +20,6 @@ body {
 
 .scene {
   height: calc(100vh - 60px);
-  cursor: grab;
 }
 
 footer {
@@ -30,6 +29,7 @@ footer {
   display: flex;
   align-items: center;
   padding: 0px 10px;
+  position: relative;
 }
 
 .points {
@@ -155,4 +155,29 @@ footer {
 .product_points > img {
   width: 25px;
   height: 25px;
+}
+
+.additionalFooter {
+  width: 260px;
+  height: 60px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 60px;
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: #e9a927;
+  border-top: 1px solid black;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+}
+
+.additionalFooter > p {
+  font-size: 14px;
+  padding: 0;
+  margin: 0;
 }
