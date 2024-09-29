@@ -24,20 +24,23 @@ export default function User3D({ position, prev }) {
             ((position[1] - startPosition[1]) * frame) / transitionFrames,
         ];
         setCurrentPosition(lerpPosition);
-        if (prev[0] != position[0] && prev[1] != position[1])
+        if (prev[0] != position[0] && prev[1] != position[1]) {
           setAngle(calculateAngle(prev[0], prev[1], position[0], position[1]));
+        }
         if (frame < transitionFrames) {
           requestAnimationFrame(animate);
         }
       };
-
       animate();
     }
   }, [position, prev]);
 
   return (
     <PositionWrapper3D position={currentPosition} angle={angle}>
-      <UserModel3D avatar_src={avatar_src} />
+      <UserModel3D
+        avatar_src={avatar_src}
+        walk={prev[0] != position[0] && prev[1] != position[1]}
+      />
     </PositionWrapper3D>
   );
 }

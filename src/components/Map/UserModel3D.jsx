@@ -4,7 +4,7 @@ import { useLoader, useFrame } from "@react-three/fiber";
 import { clone } from "three/examples/jsm/utils/SkeletonUtils.js";
 import * as THREE from "three";
 
-const UserModel3D = ({ avatar_src }) => {
+const UserModel3D = ({ avatar_src, walk }) => {
   const modelRef = useRef(null);
   const mixerRef = useRef(null);
   const memoizedAvatarSrc = useMemo(() => avatar_src, [avatar_src]);
@@ -15,9 +15,10 @@ const UserModel3D = ({ avatar_src }) => {
     if (gltf.animations && gltf.animations.length > 0) {
       const mixer = new THREE.AnimationMixer(clonedScene);
       mixerRef.current = mixer;
-      const firstAnimation = gltf.animations[1];
-      const action = mixer.clipAction(firstAnimation);
-      action.play();
+      const index = walk ? 1 : 0;
+      const animation = gltf.animations[index];
+      const action = mixer.clipAction(animation);
+      action.reset().play();
     } else {
       console.log("No animations available for this model.");
     }
@@ -27,7 +28,7 @@ const UserModel3D = ({ avatar_src }) => {
         mixerRef.current.stopAllAction();
       }
     };
-  }, [gltf.animations, clonedScene]);
+  }, [gltf.animations, clonedScene, walk]);
 
   useFrame((state, delta) => {
     if (mixerRef.current) {
